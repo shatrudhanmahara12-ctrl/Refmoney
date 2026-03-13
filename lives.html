@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefMoney - Live Session</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #121212; margin: 0; padding-bottom: 80px; color: white; text-align: center; }
+        
+        .header { background: #28a745; padding: 18px; font-weight: 600; font-size: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        
+        .live-container { padding: 20px; padding-bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* Video/Live Placeholder */
+        .video-box { width: 100%; max-width: 500px; aspect-ratio: 16/9; background: #000; border-radius: 15px; display: flex; justify-content: center; align-items: center; border: 2px solid #333; position: relative; overflow: hidden; }
+        .live-indicator { position: absolute; top: 10px; left: 10px; background: red; color: white; padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; display: none; animation: blink 1s infinite; z-index: 10; }
+        
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .offline-msg { color: #888; font-size: 14px; }
+        
+        .notice-board { width: 90%; background: #1e1e1e; margin: 20px auto; padding: 15px; border-radius: 12px; border-left: 4px solid #28a745; text-align: left; }
+        .notice-board h4 { margin: 0 0 5px 0; color: #28a745; }
+        .notice-board p { margin: 0; font-size: 13px; color: #bbb; }
+
+        /* Ads Wrapper Style for Live Page */
+        .ads-wrapper {
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto 0 auto;
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 15px;
+            min-height: 70px;
+            border: 1px solid #333;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .nav-item { text-decoration: none; color: #999; font-size: 12px; text-align: center; }
+        .nav-item.active { color: #28a745; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="header">RefMoney Live</div>
+
+<div class="live-container">
+    <div class="video-box" id="videoBox">
+        <div class="live-indicator" id="liveIcon">● LIVE</div>
+        <div id="playerContent" class="offline-msg">
+            <i style="font-size: 50px; display: block; margin-bottom: 10px;">📺</i>
+            Admin is currently offline. <br>
+            Please wait for the next session.
+        </div>
+    </div>
+</div>
+
+<div class="ads-wrapper">
+    <div id="ad-slot-1" style="display: block;">
+        <script type="text/javascript">
+            atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+    </div>
+    <div id="ad-slot-2" style="display: none;">
+        <script type="text/javascript">
+            atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+    </div>
+</div>
+<div class="notice-board">
+    <h4>Admin Announcement:</h4>
+    <p id="adminNotice">No new announcements at the moment.</p>
+</div>
+
+<div class="bottom-nav">
+    <a href="profile.html" class="nav-item">🏠<br>Home</a>
+    <a href="levels.html" class="nav-item">⬆️<br>Upgrade</a>
+    <a href="live.html" class="nav-item active">🔴<br>Live</a>
+    <a href="wallet.html" class="nav-item">💰<br>Wallet</a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+        authDomain: "refmoney-ecb39.firebaseapp.com",
+        projectId: "refmoney-ecb39",
+        storageBucket: "refmoney-ecb39.firebasestorage.app",
+        messagingSenderId: "900346819230",
+        appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f",
+        databaseURL: "https://refmoney-ecb39-default-rtdb.firebaseio.com/" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const liveRef = ref(db, 'live_stream');
+    onValue(liveRef, (snapshot) => {
+        const data = snapshot.val();
+        const player = document.getElementById("playerContent");
+        const icon = document.getElementById("liveIcon");
+        const notice = document.getElementById("adminNotice");
+
+        if (data && data.isLive) {
+            icon.style.display = "block";
+            player.innerHTML = `<iframe width="100%" height="100%" src="${data.url}" frameborder="0" allowfullscreen></iframe>`;
+            notice.innerText = data.msg || "Admin is Live now!";
+        } else {
+            icon.style.display = "none";
+            player.innerHTML = `<div class="offline-msg">Admin is currently offline.</div>`;
+            notice.innerText = "No live session right now.";
+        }
+    });
+
+    // Ads Rotation Logic (Every 8 seconds)
+    let currentAd = 1;
+    setInterval(() => {
+        const ad1 = document.getElementById('ad-slot-1');
+        const ad2 = document.getElementById('ad-slot-2');
+        if (currentAd === 1) {
+            ad1.style.display = 'none';
+            ad2.style.display = 'block';
+            currentAd = 2;
+        } else {
+            ad1.style.display = 'block';
+            ad2.style.display = 'none';
+            currentAd = 1;
+        }
+    }, 8000);
+</script>
+
+</body>
+</html>
