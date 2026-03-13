@@ -4,163 +4,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RefMoney - WhatsApp Style Group Call</title>
+    <title>RefMoney - VIP Live Conference</title>
     
     <script src='https://meet.jit.si/external_api.js'></script>
     
     <style>
-        /* WhatsApp Theme Styling */
-        body, html {
-            margin: 0;
-            padding: 0;
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background-color: #0b141a; font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; 
+        }
+
+        /* Top Header (WhatsApp Style) */
+        .header { 
+            height: 60px; background-color: #075E54; color: white; 
+            display: flex; align-items: center; padding: 0 15px; 
+            z-index: 100; position: relative; 
+        }
+        .header h3 { margin: 0; font-size: 16px; }
+        .header p { margin: 0; font-size: 11px; color: #25d366; }
+
+        /* Video Call Area */
+        #video-container { 
+            width: 100%; height: calc(100% - 190px); /* Space for header, footer & ads */
+            background: #000; 
+        }
+
+        /* Ads Section (Banner Area) */
+        .ads-section {
             width: 100%;
-            height: 100%;
-            background-color: #0b141a; /* WhatsApp Dark Mode Background */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 60px;
+            background: #111b21;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #222d34;
             overflow: hidden;
         }
 
-        /* Header like WhatsApp */
-        .header {
-            height: 60px;
-            background-color: #075E54;
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 10;
-            position: relative;
+        /* Waiting Screen Overlay */
+        #waiting-overlay {
+            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 130px);
+            background: #0b141a; color: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000; text-align: center;
         }
 
-        .header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 12px;
-            border: 1px solid #fff;
+        .loader { 
+            border: 4px solid #222d34; border-top: 4px solid #25d366; 
+            border-radius: 50%; width: 40px; height: 40px; 
+            animation: spin 1s linear infinite; margin-bottom: 15px; 
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .header-text h3 {
-            margin: 0;
-            font-size: 16px;
+        /* Footer with End Call Button */
+        .footer { 
+            height: 70px; background-color: #111b21; 
+            display: flex; justify-content: center; align-items: center; 
         }
-
-        .header-text p {
-            margin: 0;
-            font-size: 12px;
-            color: #d1d1d1;
+        .btn-end { 
+            background-color: #ea0038; width: 50px; height: 50px; 
+            border-radius: 50%; border: none; cursor: pointer; 
+            display: flex; justify-content: center; align-items: center; 
         }
-
-        /* Main Video Container */
-        #video-container {
-            width: 100%;
-            height: calc(100% - 140px); /* Adjusting for header and footer */
-            background: #111b21;
-        }
-
-        /* Footer Controls */
-        .footer-controls {
-            height: 80px;
-            background-color: #111b21;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-            border-top: 1px solid #222d34;
-        }
-
-        .btn-end {
-            background-color: #ea0038;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .btn-end svg {
-            fill: white;
-            width: 28px;
-            transform: rotate(135deg);
-        }
-
-        /* Small notification badge */
-        .live-badge {
-            position: absolute;
-            right: 20px;
-            background: #25d366;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
+        .btn-end svg { fill: white; width: 25px; transform: rotate(135deg); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <img src="https://via.placeholder.com/40/25d366/ffffff?text=RM" alt="Admin">
-        <div class="header-text">
-            <h3>RefMoney Group Call</h3>
-            <p id="status">Connecting...</p>
+        <div style="margin-right: 12px;">
+            <img src="https://via.placeholder.com/40/25d366/ffffff?text=RM" style="border-radius:50%; width:38px;">
         </div>
-        <div class="live-badge">Encrypted</div>
+        <div>
+            <h3>RefMoney VIP Live</h3>
+            <p id="status-text">Connecting to Secure Server...</p>
+        </div>
+    </div>
+
+    <div id="waiting-overlay">
+        <div class="loader"></div>
+        <h3>Waiting for Admin...</h3>
+        <p style="color:#8696a0; font-size:13px; padding:0 20px;">एडमिनले लाइभ सुरु गरेपछि तपाईं सहभागी हुन सक्नुहुनेछ।</p>
     </div>
 
     <div id="video-container"></div>
 
-    <div class="footer-controls">
+    <div class="ads-section" id="adsterra-ads">
+        <script type="text/javascript">
+            atOptions = {
+                'key' : 'YOUR_ADSTERRA_KEY_HERE', // यहाँ आफ्नो Adsterra Key हाल्नुहोस्
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/YOUR_INVOKE_CODE/invoke.js"></script>
+        </div>
+
+    <div class="footer">
         <button class="btn-end" onclick="leaveCall()">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </button>
     </div>
 
     <script>
-        // Jitsi Setup
+        // Jitsi Meet Configuration
         const domain = 'meet.jit.si';
         const options = {
-            roomName: 'RefMoney_Global_Meeting_Room_Shatrudhan_2026', // यो रुम नाममा सबै युजर भेट हुनेछन्
+            roomName: 'RefMoney_Global_VIP_Room_Shatrudhan_2026',
             width: '100%',
             height: '100%',
             parentNode: document.querySelector('#video-container'),
-            configOverwrite: { 
+            configOverwrite: {
                 startWithAudioMuted: false,
                 startWithVideoMuted: false,
-                prejoinPageEnabled: false,
-                disableDeepLinking: true
+                prejoinPageEnabled: false
             },
             interfaceConfigOverwrite: {
-                // अनावश्यक बटनहरू हटाएर ह्वाट्सएप जस्तै सफा बनाउने
-                TOOLBAR_BUTTONS: [
-                    'microphone', 'camera', 'chat', 'tileview', 'raisehand'
-                ],
-                MOBILE_APP_PROMO: false,
-                SHOW_JITSI_WATERMARK: false
+                TOOLBAR_BUTTONS: ['microphone', 'camera', 'chat', 'raisehand', 'tileview'],
+                MOBILE_APP_PROMO: false
             }
         };
 
         const api = new JitsiMeetExternalAPI(domain, options);
 
-        // Events
+        // Hide Waiting Overlay when call starts
         api.addEventListener('videoConferenceJoined', () => {
-            document.getElementById('status').innerText = 'Online • Multi-person Call';
+            setTimeout(() => {
+                document.getElementById('waiting-overlay').style.display = 'none';
+                document.getElementById('status-text').innerText = '● LIVE NOW';
+            }, 3000);
         });
 
-        api.addEventListener('videoConferenceLeft', () => {
-            window.location.href = 'profile.html';
-        });
+        // 5-10 Second Ad Refresh Logic
+        setInterval(function() {
+            const adBox = document.getElementById('adsterra-ads');
+            // यो सानो ट्रिकले विज्ञापनलाई रिफ्रेस गर्न खोज्छ
+            adBox.style.opacity = '0.99'; 
+            setTimeout(() => adBox.style.opacity = '1', 100);
+        }, 10000); // १० सेकेन्डमा विज्ञापन रिफ्रेस हुने कोसिस गर्छ
 
         function leaveCall() {
             api.executeCommand('hangup');
             window.location.href = 'profile.html';
         }
+
+        api.addEventListener('videoConferenceLeft', () => {
+            window.location.href = 'profile.html';
+        });
     </script>
 </body>
 </html>
