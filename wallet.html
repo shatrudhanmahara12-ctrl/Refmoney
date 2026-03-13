@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefMoney - Wallet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding-bottom: 90px; }
+        .header { background: #28a745; color: white; padding: 18px; text-align: center; font-weight: 600; }
+        .container { padding: 15px; }
+        
+        .balance-card { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 8px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        .withdraw-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; }
+        .btn-withdraw { width: 100%; background: #28a745; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        .history-item { background: white; padding: 12px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 13px; border-left: 5px solid orange; }
+        .status-success { border-left-color: green; }
+        .status-rejected { border-left-color: red; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .nav-item { text-decoration: none; color: #999; font-size: 12px; text-align: center; }
+        .nav-item.active { color: #28a745; font-weight: 600; }
+
+        /* Ads Wrapper Style */
+        .ads-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            background: #fff;
+            padding: 10px;
+            border-radius: 15px;
+            min-height: 70px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">My Wallet</div>
+
+<div class="container">
+    <div class="balance-card">
+        <span style="font-size: 14px; opacity: 0.8;">Available Balance</span>
+        <h2 style="font-size: 36px; margin: 10px 0;">Rs. <span id="userBal">0</span></h2>
+    </div>
+
+    <div class="withdraw-box">
+        <h3 style="margin-top:0;">Withdraw Money</h3>
+        <input type="number" id="esewaId" placeholder="eSewa ID (98XXXXXXXX)">
+        <input type="number" id="amt" placeholder="Amount (Min. 500)">
+        <button class="btn-withdraw" onclick="withdraw()">Request Withdraw</button>
+    </div>
+
+    <div class="ads-wrapper">
+        <div id="ad-slot-1" style="display: block;">
+            <script type="text/javascript">
+                atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+        </div>
+        <div id="ad-slot-2" style="display: none;">
+            <script type="text/javascript">
+                atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+        </div>
+    </div>
+    <div id="withdrawHistory" style="margin-top: 20px;">
+        <h4 style="margin-bottom: 5px;">History</h4>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="profile.html" class="nav-item">🏠<br>Home</a>
+    <a href="levels.html" class="nav-item">⬆️<br>Upgrade</a>
+    <a href="live.html" class="nav-item">🔴<br>Live</a>
+    <a href="wallet.html" class="nav-item active">💰<br>Wallet</a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+        authDomain: "refmoney-ecb39.firebaseapp.com",
+        projectId: "refmoney-ecb39",
+        storageBucket: "refmoney-ecb39.firebasestorage.app",
+        messagingSenderId: "900346819230",
+        appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const email = localStorage.getItem("userEmail");
+    let currentBal = 0;
+
+    onSnapshot(doc(db, "users", email), (s) => {
+        if(s.exists()){
+            currentBal = s.data().balance;
+            document.getElementById("userBal").innerText = currentBal;
+        }
+    });
+
+    // History Loader
+    const q = query(collection(db, "withdraw_requests"), where("gmail", "==", email));
+    onSnapshot(q, (snapshot) => {
+        const histDiv = document.getElementById("withdrawHistory");
+        histDiv.innerHTML = "<h4>History</h4>";
+        snapshot.forEach((doc) => {
+            const d = doc.data();
+            const div = document.createElement("div");
+            div.className = `history-item status-${d.status.toLowerCase()}`;
+            div.innerHTML = `<div><b>Rs. ${d.amount}</b><br><small>${d.time}</small></div><b>${d.status}</b>`;
+            histDiv.appendChild(div);
+        });
+    });
+
+    window.withdraw = async () => {
+        const id = document.getElementById("esewaId").value;
+        const amount = parseInt(document.getElementById("amt").value);
+
+        if(!id || !amount || amount < 500) { alert("Min withdraw Rs. 500!"); return; }
+        if(amount > currentBal) { alert("Insufficient balance!"); return; }
+
+        try {
+            await updateDoc(doc(db, "users", email), { balance: currentBal - amount });
+            const reqId = "WD" + Date.now();
+            await setDoc(doc(db, "withdraw_requests", reqId), {
+                gmail: email,
+                esewa: id,
+                amount: amount,
+                status: "Pending",
+                time: new Date().toLocaleString()
+            });
+            alert("Withdraw request sent!");
+        } catch (e) { alert(e.message); }
+    }
+
+    // Ads Rotation Logic (Switches every 8 seconds)
+    let currentAd = 1;
+    setInterval(() => {
+        const ad1 = document.getElementById('ad-slot-1');
+        const ad2 = document.getElementById('ad-slot-2');
+        if (currentAd === 1) {
+            ad1.style.display = 'none';
+            ad2.style.display = 'block';
+            currentAd = 2;
+        } else {
+            ad1.style.display = 'block';
+            ad2.style.display = 'none';
+            currentAd = 1;
+        }
+    }, 8000);
+</script>
+</body>
+</html>
