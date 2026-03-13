@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefMoney - Upgrade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f4f7f6; margin: 0; padding-bottom: 90px; }
+        .header { background: #28a745; color: white; padding: 18px; text-align: center; font-weight: 600; font-size: 20px; }
+        .container { padding: 15px; }
+        
+        /* Payment Info */
+        .payment-card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 5px solid #28a745; margin-bottom: 20px; }
+        .esewa-id { font-size: 24px; color: #28a745; font-weight: 700; }
+
+        /* Level Grid */
+        .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .level-item { background: white; padding: 15px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; text-align: center; transition: 0.3s; }
+        .level-item.active { border-color: #28a745; background: #eaffed; }
+        .level-item b { display: block; font-size: 16px; }
+
+        /* Input Form */
+        .input-group { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 16px; }
+        .submit-btn { width: 100%; background: #28a745; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .nav-item { text-decoration: none; color: #999; font-size: 12px; text-align: center; }
+        .nav-item.active { color: #28a745; font-weight: 600; }
+
+        /* Ads Wrapper Style */
+        .ads-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 15px;
+            min-height: 70px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">Upgrade Level</div>
+
+<div class="container">
+    <div class="payment-card">
+        <div style="font-size: 13px; color: #666;">Send Payment to eSewa:</div>
+        <div class="esewa-id">9805644045</div>
+        <p style="font-size: 11px; color: red;">*पहिले पैसा पठाउनुहोस् अनि मात्र ID हाल्नुहोस्।</p>
+    </div>
+
+    <div class="level-grid">
+        <div class="level-item" id="L1" onclick="selectLevel(1, 500)"><b>Level 1</b><span>Rs. 500</span></div>
+        <div class="level-item" id="L2" onclick="selectLevel(2, 1000)"><b>Level 2</b><span>Rs. 1000</span></div>
+        <div class="level-item" id="L3" onclick="selectLevel(3, 1500)"><b>Level 3</b><span>Rs. 1500</span></div>
+        <div class="level-item" id="L4" onclick="selectLevel(4, 2000)"><b>Level 4</b><span>Rs. 2000</span></div>
+    </div>
+
+    <div class="ads-wrapper">
+        <div id="ad-slot-1" style="display: block;">
+            <script type="text/javascript">
+                atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+        </div>
+        <div id="ad-slot-2" style="display: none;">
+            <script type="text/javascript">
+                atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+        </div>
+    </div>
+    <div class="input-group">
+        <label style="font-size: 13px; font-weight: 600;">Transaction ID (eSewa):</label>
+        <input type="text" id="transID" placeholder="Enter Transaction ID">
+        <button class="submit-btn" onclick="sendUpgradeRequest()">Submit Upgrade</button>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="profile.html" class="nav-item">🏠<br>Home</a>
+    <a href="levels.html" class="nav-item active">⬆️<br>Upgrade</a>
+    <a href="live.html" class="nav-item">🔴<br>Live</a>
+    <a href="wallet.html" class="nav-item">💰<br>Wallet</a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+        authDomain: "refmoney-ecb39.firebaseapp.com",
+        projectId: "refmoney-ecb39",
+        storageBucket: "refmoney-ecb39.firebasestorage.app",
+        messagingSenderId: "900346819230",
+        appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let selectedLvl = 0;
+    let selectedPrice = 0;
+
+    window.selectLevel = (lvl, price) => {
+        selectedLvl = lvl;
+        selectedPrice = price;
+        document.querySelectorAll('.level-item').forEach(e => e.classList.remove('active'));
+        document.getElementById('L'+lvl).classList.add('active');
+    }
+
+    window.sendUpgradeRequest = async () => {
+        const tid = document.getElementById("transID").value.trim();
+        const userEmail = localStorage.getItem("userEmail");
+
+        if(selectedLvl === 0 || !tid) { alert("Please select level and enter Transaction ID!"); return; }
+
+        try {
+            await setDoc(doc(db, "upgrade_requests", tid), {
+                gmail: userEmail,
+                level: selectedLvl,
+                amount: selectedPrice,
+                status: "Pending",
+                time: new Date().toLocaleString()
+            });
+            alert("Upgrade request submitted! Admin will verify soon.");
+            document.getElementById("transID").value = "";
+        } catch (e) { alert(e.message); }
+    }
+
+    // Ads Rotation Logic (Switches every 8 seconds)
+    let currentAd = 1;
+    setInterval(() => {
+        const ad1 = document.getElementById('ad-slot-1');
+        const ad2 = document.getElementById('ad-slot-2');
+        if (currentAd === 1) {
+            ad1.style.display = 'none';
+            ad2.style.display = 'block';
+            currentAd = 2;
+        } else {
+            ad1.style.display = 'block';
+            ad2.style.display = 'none';
+            currentAd = 1;
+        }
+    }, 8000);
+</script>
+</body>
+</html>
