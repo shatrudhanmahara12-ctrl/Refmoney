@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefMoney - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding-bottom: 80px; }
+        .header { background: #28a745; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .logout-btn { background: #ff4d4d; border: none; color: white; padding: 5px 12px; border-radius: 5px; font-weight: 600; cursor: pointer; }
+        
+        .dashboard { padding: 15px; }
+        .profile-card { background: white; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .balance-amount { font-size: 32px; font-weight: 600; color: #28a745; margin: 10px 0; }
+        
+        /* Unique ID Display */
+        .id-badge { background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 10px; font-weight: 600; display: inline-block; margin-top: 10px; border: 1px dashed #28a745; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .info-item { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #eee; }
+        .info-item b { display: block; color: #333; font-size: 16px; }
+        .info-item span { font-size: 12px; color: #999; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .nav-item { text-decoration: none; color: #999; font-size: 12px; text-align: center; }
+        .nav-item.active { color: #28a745; font-weight: 600; }
+
+        /* Ads Container Style */
+        .ads-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 15px;
+            min-height: 70px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="font-weight: 600; font-size: 20px;">RefMoney</div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="dashboard">
+    <div class="profile-card">
+        <div style="color: #666; font-size: 14px;" id="userEmail">Loading...</div>
+        <div class="balance-amount">Rs. <span id="balance">0</span></div>
+        <div style="font-size: 13px; color: #888;">My Referral ID:</div>
+        <div class="id-badge" id="myUniqueId">REF....</div>
+    </div>
+
+    <div class="ads-wrapper">
+        <div id="ad-slot-1" style="display: block;">
+            <script type="text/javascript">
+                atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+        </div>
+        <div id="ad-slot-2" style="display: none;">
+            <script type="text/javascript">
+                atOptions = { 'key' : '6eede0c59a7ac90fa38d5f0548f0e6a8', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/6eede0c59a7ac90fa38d5f0548f0e6a8/invoke.js"></script>
+        </div>
+    </div>
+    <div class="info-grid">
+        <div class="info-item">
+            <b id="level">0</b>
+            <span>My Level</span>
+        </div>
+        <div class="info-item">
+            <b id="status">Active</b>
+            <span>Status</span>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="profile.html" class="nav-item active">🏠<br>Home</a>
+    <a href="levels.html" class="nav-item">⬆️<br>Upgrade</a>
+    <a href="live.html" class="nav-item">🔴<br>Live</a>
+    <a href="wallet.html" class="nav-item">💰<br>Wallet</a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+        authDomain: "refmoney-ecb39.firebaseapp.com",
+        projectId: "refmoney-ecb39",
+        storageBucket: "refmoney-ecb39.firebasestorage.app",
+        messagingSenderId: "900346819230",
+        appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const email = localStorage.getItem("userEmail");
+
+    if (!email) { window.location.href = "index.html"; }
+
+    onSnapshot(doc(db, "users", email), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("userEmail").innerText = data.gmail;
+            document.getElementById("balance").innerText = data.balance;
+            document.getElementById("level").innerText = data.level;
+            document.getElementById("myUniqueId").innerText = data.myId;
+            document.getElementById("status").innerText = data.status;
+        }
+    });
+
+    window.logout = function() {
+        localStorage.removeItem("userEmail");
+        window.location.href = "index.html";
+    }
+
+    // Ads Rotation Logic (Switches every 8 seconds)
+    let currentAd = 1;
+    setInterval(() => {
+        const ad1 = document.getElementById('ad-slot-1');
+        const ad2 = document.getElementById('ad-slot-2');
+        if (currentAd === 1) {
+            ad1.style.display = 'none';
+            ad2.style.display = 'block';
+            currentAd = 2;
+        } else {
+            ad1.style.display = 'block';
+            ad2.style.display = 'none';
+            currentAd = 1;
+        }
+    }, 8000);
+</script>
+</body>
+</html>
