@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefMoney - Final Super Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #28a745; --dark: #1a1a1a; --danger: #dc3545; --warning: #ffc107; --blue: #007bff; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding-bottom: 80px; color: #333; }
+        
+        /* Header & Navigation */
+        .header { background: var(--dark); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { text-decoration: none; color: #999; font-size: 11px; text-align: center; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary); font-weight: 600; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 3px; }
+
+        .container { padding: 15px; max-width: 800px; margin: auto; }
+        
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-bottom: 4px solid var(--primary); }
+        .stat-card b { font-size: 22px; color: var(--primary); display: block; }
+        
+        /* Section Box */
+        .admin-section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
+        h3 { margin: 0 0 15px 0; font-size: 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+
+        /* Tables */
+        .scroll-box { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 450px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f8f9fa; font-weight: 600; }
+
+        /* Powerful Buttons */
+        .btn { padding: 6px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; margin: 2px; transition: 0.2s; }
+        .btn-approve { background: var(--primary); color: white; }
+        .btn-reject { background: var(--danger); color: white; }
+        .btn-block { background: var(--dark); color: white; }
+        .btn-edit { background: var(--blue); color: white; }
+        .btn:active { transform: scale(0.9); }
+
+        /* Inputs */
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .update-btn { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        /* Badge Status */
+        .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; text-transform: uppercase; }
+        .bg-pending { background: #fff3cd; color: #856404; }
+        .bg-success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="font-size: 20px; font-weight: 700;">SUPER ADMIN PANEL</div>
+    <div id="statusIndicator" style="font-size: 10px; color: #28a745;">Connected to Firebase Database</div>
+</div>
+
+<div class="container">
+    
+    <div id="tab-dashboard" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card"><b id="count-users">0</b>Total Users</div>
+            <div class="stat-card"><b id="count-pending">0</b>Pending Req</div>
+        </div>
+
+        <div class="admin-section">
+            <h3>🔴 Live & Announcement Control</h3>
+            <label>Live URL (YouTube Embed):</label>
+            <input type="text" id="liveUrl" placeholder="https://www.youtube.com/embed/XXXXX">
+            
+            <label>Admin Notice Board:</label>
+            <input type="text" id="liveMsg" placeholder="Enter session message...">
+            
+            <div style="display: flex; gap: 10px;">
+                <div style="flex:1">
+                    <label>Live Status:</label>
+                    <select id="liveStatus">
+                        <option value="true">Stream: ONLINE</option>
+                        <option value="false">Stream: OFFLINE</option>
+                    </select>
+                </div>
+                <div style="flex:1">
+                    <label>Mic Control:</label>
+                    <select id="micStatus">
+                        <option value="Joined">Mic: JOINED (All)</option>
+                        <option value="Disjointed">Mic: DISJOINTED</option>
+                        <option value="Off">Mic: ALL OFF</option>
+                    </select>
+                </div>
+            </div>
+            <button class="update-btn" onclick="updateLiveSettings()">Save & Update Live System</button>
+        </div>
+    </div>
+
+    <div id="tab-users" class="tab-content" style="display:none;">
+        <div class="admin-section">
+            <h3>👥 User Profile & Database</h3>
+            <div class="scroll-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User (Gmail/Pass)</th>
+                            <th>ID/Level</th>
+                            <th>Balance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-requests" class="tab-content" style="display:none;">
+        <div class="admin-section">
+            <h3>⭐ Level Upgrade Requests</h3>
+            <div class="scroll-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Level</th>
+                            <th>Trans ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upgradeList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>💸 Withdraw Requests (Auto-Refund Support)</h3>
+            <div class="scroll-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>eSewa ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="showTab('dashboard', this)"><i>📊</i>Dashboard</div>
+    <div class="nav-item" onclick="showTab('users', this)"><i>👥</i>Users</div>
+    <div class="nav-item" onclick="showTab('requests', this)"><i>💰</i>Requests</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+        authDomain: "refmoney-ecb39.firebaseapp.com",
+        projectId: "refmoney-ecb39",
+        storageBucket: "refmoney-ecb39.firebasestorage.app",
+        messagingSenderId: "900346819230",
+        appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f",
+        databaseURL: "https://refmoney-ecb39-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const rtdb = getDatabase(app);
+
+    // --- Tab Switcher ---
+    window.showTab = (tab, el) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('tab-'+tab).style.display = 'block';
+        el.classList.add('active');
+    };
+
+    // --- Live System Control ---
+    window.updateLiveSettings = () => {
+        const url = document.getElementById("liveUrl").value;
+        const msg = document.getElementById("liveMsg").value;
+        const isLive = document.getElementById("liveStatus").value === "true";
+        const mic = document.getElementById("micStatus").value;
+
+        update(ref(rtdb, 'live_stream'), { url, msg, isLive, mic })
+        .then(() => alert("Live system updated successfully!"));
+    };
+
+    // --- User Management Logic ---
+    onSnapshot(collection(db, "users"), (snap) => {
+        const list = document.getElementById("userList");
+        list.innerHTML = "";
+        document.getElementById("count-users").innerText = snap.size;
+        snap.forEach(d => {
+            const u = d.data();
+            list.innerHTML += `
+                <tr>
+                    <td>${u.gmail}<br><small>Pw: ${u.password}</small></td>
+                    <td>${u.myId}<br>Lvl: ${u.level}</td>
+                    <td><b>Rs.${u.balance}</b></td>
+                    <td>
+                        <button class="btn btn-edit" onclick="changeBal('${d.id}', ${u.balance})">Edit</button>
+                        <button class="btn btn-block" onclick="toggleBlock('${d.id}', '${u.status}')">${u.status == 'Blocked' ? 'Unblock' : 'Block'}</button>
+                    </td>
+                </tr>
+            `;
+        });
+    });
+
+    window.changeBal = async (email, old) => {
+        const n = prompt("Add amount (use - for minus):", "0");
+        if(n) await updateDoc(doc(db, "users", email), { balance: old + parseInt(n) });
+    };
+
+    window.toggleBlock = async (email, s) => {
+        await updateDoc(doc(db, "users", email), { status: s == 'Active' ? 'Blocked' : 'Active' });
+    };
+
+    // --- Upgrade & Withdraw with Rejected Refund Logic ---
+    onSnapshot(collection(db, "upgrade_requests"), (snap) => {
+        const list = document.getElementById("upgradeList");
+        list.innerHTML = "";
+        let pending = 0;
+        snap.forEach(d => {
+            const r = d.data();
+            if(r.status === "Pending") {
+                pending++;
+                list.innerHTML += `
+                    <tr>
+                        <td>${r.gmail}</td>
+                        <td>Lvl ${r.level}</td>
+                        <td>${d.id}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="handleAction('upgrade', '${d.id}', 'Success')">Approve</button>
+                            <button class="btn btn-reject" onclick="handleAction('upgrade', '${d.id}', 'Rejected')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+        document.getElementById("count-pending").innerText = pending;
+    });
+
+    onSnapshot(collection(db, "withdraw_requests"), (snap) => {
+        const list = document.getElementById("withdrawList");
+        list.innerHTML = "";
+        snap.forEach(d => {
+            const w = d.data();
+            if(w.status === "Pending") {
+                list.innerHTML += `
+                    <tr>
+                        <td>${w.gmail}</td>
+                        <td>Rs.${w.amount}</td>
+                        <td>${w.esewa}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="handleAction('withdraw', '${d.id}', 'Success')">Paid</button>
+                            <button class="btn btn-reject" onclick="handleAction('withdraw', '${d.id}', 'Rejected')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+    });
+
+    window.handleAction = async (type, id, status) => {
+        const confirmMsg = status === 'Rejected' ? "के तपाईँ यो रिक्वेस्ट रिजेक्ट गर्न चाहनुहुन्छ? (Withdraw भए पैसा फिर्ता हुनेछ)" : "के तपाईँ यसलाई एप्रुभ गर्न चाहनुहुन्छ?";
+        if(!confirm(confirmMsg)) return;
+
+        const reqRef = doc(db, type === 'upgrade' ? 'upgrade_requests' : 'withdraw_requests', id);
+        const reqSnap = await getDoc(reqRef);
+        const data = reqSnap.data();
+
+        if(status === 'Success' && type === 'upgrade') {
+            await updateDoc(doc(db, "users", data.gmail), { level: data.level });
+        }
+
+        if(status === 'Rejected' && type === 'withdraw') {
+            const userRef = doc(db, "users", data.gmail);
+            const userSnap = await getDoc(userRef);
+            await updateDoc(userRef, { balance: userSnap.data().balance + data.amount });
+        }
+
+        await updateDoc(reqRef, { status: status });
+        alert("Action Completed: " + status);
+    };
+</script>
+</body>
+</html>
