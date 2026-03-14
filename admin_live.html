@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <title>RefMoney - Admin Live Control</title>
+    <script src='https://meet.jit.si/external_api.js'></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // तपाईँको Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+            authDomain: "refmoney-ecb39.firebaseapp.com",
+            projectId: "refmoney-ecb39",
+            storageBucket: "refmoney-ecb39.firebasestorage.app",
+            messagingSenderId: "900346819230",
+            appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const domain = 'meet.jit.si';
+        const options = {
+            roomName: 'refmoneyvip2026',
+            width: '100%',
+            height: '100%',
+            parentNode: document.querySelector('#meet')
+        };
+
+        const api = new JitsiMeetExternalAPI(domain, options);
+
+        // जब एडमिन लाइभमा जोडिन्छ, समय सेभ हुन्छ
+        api.addEventListener('videoConferenceJoined', async () => {
+            try {
+                await addDoc(collection(db, "live_history"), {
+                    startTime: new Date().toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, day: 'numeric', month: 'short' }),
+                    timestamp: serverTimestamp()
+                });
+                alert("Live time recorded in History!");
+            } catch (e) {
+                console.error("Error saving history: ", e);
+            }
+        });
+    </script>
+</head>
+<body style="margin:0;">
+    <div id="meet" style="height:100vh;"></div>
+</body>
+</html>
