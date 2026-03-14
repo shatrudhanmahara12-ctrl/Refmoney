@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,8 +86,22 @@
         const btn = document.getElementById('authBtn');
         const errorBox = document.getElementById('errorBox');
 
-        if (!email || !pass || !refEntered) {
-            alert("All fields are required!");
+        // १. अनिवार्य फिल्ड चेक
+        if (!email || !pass) {
+            alert("Email and Password are required!");
+            return;
+        }
+
+        // २. Gmail Format Check (यसले जथाभाबी इमेल हाल्नबाट रोक्छ)
+        const gmailRegex = /^[a-z0-9](\.?[a-z0-9]){5,}@gmail\.com$/;
+        if (!gmailRegex.test(email)) {
+            alert("कृपया सही Gmail Address हाल्नुहोस् (example@gmail.com)");
+            return;
+        }
+
+        // ३. पासवर्डको लम्बाई चेक
+        if (pass.length < 6) {
+            alert("Password must be at least 6 characters!");
             return;
         }
 
@@ -100,21 +113,27 @@
             const userRef = doc(db, "users", email);
             const userSnap = await getDoc(userRef);
 
-            // १. यदि पुरानो युजर हो भने लगइन गर्ने
+            // ४. यदि पुरानो युजर हो भने लगइन गर्ने
             if (userSnap.exists()) {
                 const data = userSnap.data();
                 if (data.password === pass) {
                     localStorage.setItem("userEmail", email);
                     window.location.href = "profile.html";
                 } else {
-                    alert("Wrong Password!");
+                    alert("Wrong Password! You are not the owner of this account.");
                     resetBtn();
                 }
             } else {
-                // २. नयाँ युजरको लागि रेफरल चेक गर्ने
+                // ५. नयाँ युजरको लागि रेफरल चेक गर्ने (नयाँ युजरलाई मात्र Referral ID अनिवार्य)
+                if (!refEntered) {
+                    alert("Referral ID is required for New Users!");
+                    resetBtn();
+                    return;
+                }
+
                 let isValid = false;
 
-                // मास्टर कोड चेक (यो कतै देखिँदैन)
+                // मास्टर कोड चेक
                 if (refEntered === "123456") {
                     isValid = true;
                 } else {
