@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ne">
 <head>
@@ -7,6 +6,40 @@
     <title>RefMoney - VIP Live Conference</title>
     
     <script src='https://meet.jit.si/external_api.js'></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // Firebase Config (तपाईँकै पुरानो Config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgqr5uCLZIeFUVIHiBppwpzLbYAyhGsIc",
+            authDomain: "refmoney-ecb39.firebaseapp.com",
+            projectId: "refmoney-ecb39",
+            storageBucket: "refmoney-ecb39.firebasestorage.app",
+            messagingSenderId: "900346819230",
+            appId: "1:900346819230:web:3d1a1af4ce05f546f3c18f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // एडमिनको पछिल्लो लाइभ समय तान्ने फङ्सन
+        async function fetchLastLive() {
+            try {
+                const historyRef = collection(db, "live_history");
+                const q = query(historyRef, orderBy("timestamp", "desc"), limit(1));
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    document.getElementById('last-live-time').innerText = "Last Live: " + data.startTime;
+                });
+            } catch (e) {
+                console.log("History not found yet.");
+            }
+        }
+        fetchLastLive();
+    </script>
     
     <style>
         body, html { 
@@ -15,7 +48,6 @@
             overflow: hidden; 
         }
 
-        /* Top Header (WhatsApp Style) */
         .header { 
             height: 60px; background-color: #075E54; color: white; 
             display: flex; align-items: center; padding: 0 15px; 
@@ -24,29 +56,32 @@
         .header h3 { margin: 0; font-size: 16px; }
         .header p { margin: 0; font-size: 11px; color: #25d366; }
 
-        /* Video Call Area */
         #video-container { 
             width: 100%; height: calc(100% - 190px); 
             background: #000; 
         }
 
-        /* Ads Section (Banner Area) */
         .ads-section {
-            width: 100%;
-            height: 60px;
-            background: #111b21;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-top: 1px solid #222d34;
-            overflow: hidden;
+            width: 100%; height: 60px; background: #111b21;
+            display: flex; justify-content: center; align-items: center;
+            border-top: 1px solid #222d34; overflow: hidden;
         }
 
-        /* Waiting Screen Overlay */
         #waiting-overlay {
             position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 130px);
             background: #0b141a; color: white; display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 1000; text-align: center;
+        }
+
+        /* History Time Box Style */
+        .history-box {
+            background: rgba(37, 211, 102, 0.1);
+            color: #25d366;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 15px;
+            border: 1px solid rgba(37, 211, 102, 0.3);
         }
 
         .loader { 
@@ -56,7 +91,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Footer with End Call Button */
         .footer { 
             height: 70px; background-color: #111b21; 
             display: flex; justify-content: center; align-items: center; 
@@ -85,6 +119,8 @@
         <div class="loader"></div>
         <h3>Waiting for Admin...</h3>
         <p style="color:#8696a0; font-size:13px; padding:0 20px;">एडमिनले लाइभ सुरु गरेपछि तपाईं सहभागी हुन सक्नुहुनेछ।</p>
+        
+        <div class="history-box" id="last-live-time">Checking last live history...</div>
     </div>
 
     <div id="video-container"></div>
@@ -94,9 +130,7 @@
             atOptions = {
                 'key' : 'YOUR_ADSTERRA_KEY_HERE', 
                 'format' : 'iframe',
-                'height' : 50,
-                'width' : 320,
-                'params' : {}
+                'height' : 50, 'width' : 320, 'params' : {}
             };
         </script>
         <script type="text/javascript" src="//www.highperformanceformat.com/YOUR_INVOKE_CODE/invoke.js"></script>
@@ -109,10 +143,8 @@
     </div>
 
     <script>
-        // Jitsi Meet Configuration
         const domain = 'meet.jit.si';
         const options = {
-            // रुम नाम साना अक्षरमा (Small Letters) राखियो
             roomName: 'refmoneyvip2026', 
             width: '100%',
             height: '100%',
@@ -131,20 +163,12 @@
 
         const api = new JitsiMeetExternalAPI(domain, options);
 
-        // Hide Waiting Overlay when call starts
         api.addEventListener('videoConferenceJoined', () => {
             setTimeout(() => {
                 document.getElementById('waiting-overlay').style.display = 'none';
                 document.getElementById('status-text').innerText = '● LIVE NOW';
-            }, 3000);
+            }, 2000);
         });
-
-        // Ad Refresh Logic
-        setInterval(function() {
-            const adBox = document.getElementById('adsterra-ads');
-            adBox.style.opacity = '0.99'; 
-            setTimeout(() => adBox.style.opacity = '1', 100);
-        }, 10000);
 
         function leaveCall() {
             api.executeCommand('hangup');
