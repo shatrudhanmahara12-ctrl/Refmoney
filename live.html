@@ -26,7 +26,7 @@
 
         /* Video Call Area */
         #video-container { 
-            width: 100%; height: calc(100% - 190px); /* Space for header, footer & ads */
+            width: 100%; height: calc(100% - 190px); 
             background: #000; 
         }
 
@@ -100,7 +100,7 @@
             };
         </script>
         <script type="text/javascript" src="//www.highperformanceformat.com/YOUR_INVOKE_CODE/invoke.js"></script>
-        </div>
+    </div>
 
     <div class="footer">
         <button class="btn-end" onclick="leaveCall()">
@@ -112,8 +112,8 @@
         // Jitsi Meet Configuration
         const domain = 'meet.jit.si';
         const options = {
-            // रुम नाम छोटो बनाइयो ताकि 'Disconnected' नहोस्
-            roomName: 'RefMoneyVIP_2026', 
+            // रुम नाम साना अक्षरमा (Small Letters) राखियो
+            roomName: 'refmoneyvip2026', 
             width: '100%',
             height: '100%',
             parentNode: document.querySelector('#video-container'),
@@ -139,7 +139,7 @@
             }, 3000);
         });
 
-        // 5-10 Second Ad Refresh Logic
+        // Ad Refresh Logic
         setInterval(function() {
             const adBox = document.getElementById('adsterra-ads');
             adBox.style.opacity = '0.99'; 
